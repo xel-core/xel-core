@@ -25,8 +25,10 @@ export const defaults = {
         enabled: process.env.CORE_API_SSL,
         host: process.env.CORE_API_SSL_HOST || "0.0.0.0",
         port: process.env.CORE_API_SSL_PORT || 8443,
-        key: process.env.CORE_API_SSL_KEY,
-        cert: process.env.CORE_API_SSL_CERT,
+        tls: {
+            key: process.env.CORE_API_SSL_KEY,
+            cert: process.env.CORE_API_SSL_CERT,
+        },
     },
     // @see https://github.com/faustbrian/hapi-version
     versions: {

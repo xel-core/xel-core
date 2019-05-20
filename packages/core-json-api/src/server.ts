@@ -1,5 +1,5 @@
 import { app } from "@arkecosystem/core-container";
-import { createSecureServer, createServer, mountServer } from "@arkecosystem/core-http-utils";
+import { createServer, mountServer } from "@arkecosystem/core-http-utils";
 import { Logger } from "@arkecosystem/core-interfaces";
 import Hapi from "@hapi/hapi";
 import { plugin as blacklist } from "@hapist/blacklist";
@@ -17,27 +17,15 @@ export class Server {
     public constructor(private readonly config: Record<string, any>) {}
 
     public async start(): Promise<void> {
-        const options = {
-            host: this.config.http.host,
-            port: this.config.http.port,
-            routes: {
-                validate: {
-                    async failAction(request, h, err) {
-                        throw err;
-                    },
-                },
-            },
-        };
-
         if (this.config.http.enabled) {
-            this.http = await createServer(options);
+            this.http = await createServer(this.config.http);
             this.http.app.config = this.config;
 
             this.registerPlugins("HTTP", this.http);
         }
 
         if (this.config.https.enabled) {
-            this.https = await createSecureServer(options, undefined, this.config.https);
+            this.https = await createServer(this.config.https);
             this.https.app.config = this.config;
 
             this.registerPlugins("HTTPS", this.https);

@@ -9,8 +9,10 @@ export const defaults = {
         enabled: false,
         host: "0.0.0.0",
         port: 8443,
-        key: process.env.CORE_API_SSL_KEY,
-        cert: process.env.CORE_API_SSL_CERT,
+        tls: {
+            key: process.env.CORE_API_SSL_KEY,
+            cert: process.env.CORE_API_SSL_CERT,
+        },
     },
 
     whitelist: ["*"],
