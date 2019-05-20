@@ -52,7 +52,6 @@ jobs:
       - save_cache:
           key: 'core-node10-{{ checksum "checksum.txt" }}-unit-1'
           paths:
-            - ./packages/.DS_Store/node_modules
             - ./packages/core/node_modules
             - ./packages/core-api/node_modules
             - ./packages/core-blockchain/node_modules
@@ -141,7 +140,6 @@ jobs:
       - save_cache:
           key: 'core-node11-{{ checksum "checksum.txt" }}-unit-1'
           paths:
-            - ./packages/.DS_Store/node_modules
             - ./packages/core/node_modules
             - ./packages/core-api/node_modules
             - ./packages/core-blockchain/node_modules
@@ -238,7 +236,6 @@ jobs:
       - save_cache:
           key: 'core-node10-{{ checksum "checksum.txt" }}-functional-1'
           paths:
-            - ./packages/.DS_Store/node_modules
             - ./packages/core/node_modules
             - ./packages/core-api/node_modules
             - ./packages/core-blockchain/node_modules
@@ -335,7 +332,6 @@ jobs:
       - save_cache:
           key: 'core-node11-{{ checksum "checksum.txt" }}-functional-1'
           paths:
-            - ./packages/.DS_Store/node_modules
             - ./packages/core/node_modules
             - ./packages/core-api/node_modules
             - ./packages/core-blockchain/node_modules
@@ -432,7 +428,6 @@ jobs:
       - save_cache:
           key: 'core-node10-{{ checksum "checksum.txt" }}-1-1'
           paths:
-            - ./packages/.DS_Store/node_modules
             - ./packages/core/node_modules
             - ./packages/core-api/node_modules
             - ./packages/core-blockchain/node_modules
@@ -454,12 +449,6 @@ jobs:
       - run:
           name: Create .core/database directory
           command: mkdir -p $HOME/.core/database
-      - run:
-          name: .DS_Store - integration
-          command: >-
-            cd ~/core/.circleci && ./rebuild-db.sh && cd ~/core && yarn
-            test:coverage /integration/.DS_Store/ --coverageDirectory
-            .coverage/integration/.DS_Store
       - run:
           name: core-api - integration
           command: >-
@@ -484,6 +473,12 @@ jobs:
             cd ~/core/.circleci && ./rebuild-db.sh && cd ~/core && yarn
             test:coverage /integration/core-forger/ --coverageDirectory
             .coverage/integration/core-forger
+      - run:
+          name: core-json-rpc - integration
+          command: >-
+            cd ~/core/.circleci && ./rebuild-db.sh && cd ~/core && yarn
+            test:coverage /integration/core-json-rpc/ --coverageDirectory
+            .coverage/integration/core-json-rpc
       - run:
           name: Last 1000 lines of test output
           when: on_fail
@@ -554,7 +549,6 @@ jobs:
       - save_cache:
           key: 'core-node11-{{ checksum "checksum.txt" }}-1-1'
           paths:
-            - ./packages/.DS_Store/node_modules
             - ./packages/core/node_modules
             - ./packages/core-api/node_modules
             - ./packages/core-blockchain/node_modules
@@ -576,12 +570,6 @@ jobs:
       - run:
           name: Create .core/database directory
           command: mkdir -p $HOME/.core/database
-      - run:
-          name: .DS_Store - integration
-          command: >-
-            cd ~/core/.circleci && ./rebuild-db.sh && cd ~/core && yarn
-            test:coverage /integration/.DS_Store/ --coverageDirectory
-            .coverage/integration/.DS_Store
       - run:
           name: core-api - integration
           command: >-
@@ -606,6 +594,12 @@ jobs:
             cd ~/core/.circleci && ./rebuild-db.sh && cd ~/core && yarn
             test:coverage /integration/core-forger/ --coverageDirectory
             .coverage/integration/core-forger
+      - run:
+          name: core-json-rpc - integration
+          command: >-
+            cd ~/core/.circleci && ./rebuild-db.sh && cd ~/core && yarn
+            test:coverage /integration/core-json-rpc/ --coverageDirectory
+            .coverage/integration/core-json-rpc
       - run:
           name: Last 1000 lines of test output
           when: on_fail
@@ -665,7 +659,6 @@ jobs:
       - save_cache:
           key: 'core-node10-{{ checksum "checksum.txt" }}-benchmark-1'
           paths:
-            - ./packages/.DS_Store/node_modules
             - ./packages/core/node_modules
             - ./packages/core-api/node_modules
             - ./packages/core-blockchain/node_modules
@@ -736,7 +729,6 @@ jobs:
       - save_cache:
           key: 'core-node11-{{ checksum "checksum.txt" }}-benchmark-1'
           paths:
-            - ./packages/.DS_Store/node_modules
             - ./packages/core/node_modules
             - ./packages/core-api/node_modules
             - ./packages/core-blockchain/node_modules
@@ -815,7 +807,6 @@ jobs:
       - save_cache:
           key: 'ark-node10-e2e-{{ checksum "checksum.txt" }}-1-1'
           paths:
-            - ./packages/.DS_Store/node_modules
             - ./packages/core/node_modules
             - ./packages/core-api/node_modules
             - ./packages/core-blockchain/node_modules
@@ -936,7 +927,6 @@ jobs:
       - save_cache:
           key: 'ark-node11-e2e-{{ checksum "checksum.txt" }}-2-1'
           paths:
-            - ./packages/.DS_Store/node_modules
             - ./packages/core/node_modules
             - ./packages/core-api/node_modules
             - ./packages/core-blockchain/node_modules
@@ -1060,7 +1050,6 @@ jobs:
       - save_cache:
           key: 'core-node10-{{ checksum "checksum.txt" }}-1-1'
           paths:
-            - ./packages/.DS_Store/node_modules
             - ./packages/core/node_modules
             - ./packages/core-api/node_modules
             - ./packages/core-blockchain/node_modules
@@ -1082,12 +1071,6 @@ jobs:
       - run:
           name: Create .core/database directory
           command: mkdir -p $HOME/.core/database
-      - run:
-          name: core-json-rpc - integration
-          command: >-
-            cd ~/core/.circleci && ./rebuild-db.sh && cd ~/core && yarn
-            test:coverage /integration/core-json-rpc/ --coverageDirectory
-            .coverage/integration/core-json-rpc
       - run:
           name: core-p2p - integration
           command: >-
@@ -1188,7 +1171,6 @@ jobs:
       - save_cache:
           key: 'core-node11-{{ checksum "checksum.txt" }}-1-1'
           paths:
-            - ./packages/.DS_Store/node_modules
             - ./packages/core/node_modules
             - ./packages/core-api/node_modules
             - ./packages/core-blockchain/node_modules
@@ -1210,12 +1192,6 @@ jobs:
       - run:
           name: Create .core/database directory
           command: mkdir -p $HOME/.core/database
-      - run:
-          name: core-json-rpc - integration
-          command: >-
-            cd ~/core/.circleci && ./rebuild-db.sh && cd ~/core && yarn
-            test:coverage /integration/core-json-rpc/ --coverageDirectory
-            .coverage/integration/core-json-rpc
       - run:
           name: core-p2p - integration
           command: >-

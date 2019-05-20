@@ -6,14 +6,15 @@ import { plugin as blacklist } from "@hapist/blacklist";
 import { plugin as jsonapi } from "@hapist/json-api";
 import { plugin as whitelist } from "@hapist/whitelist";
 import rateLimit from "hapi-rate-limit";
+import { IServer } from "./interfaces";
+import { modules } from "./modules";
 
 export class Server {
-    private logger = app.resolvePlugin<Logger.ILogger>("logger");
+    private readonly logger: Logger.ILogger = app.resolvePlugin<Logger.ILogger>("logger");
+    private http: IServer;
+    private https: IServer;
 
-    private http: any;
-    private https: any;
-
-    public constructor(private readonly config: any) {}
+    public constructor(private readonly config: Record<string, any>) {}
 
     public async start(): Promise<void> {
         const options = {
@@ -78,7 +79,6 @@ export class Server {
         });
 
         await server.register({
-            // @ts-ignore
             plugin: whitelist,
             options: {
                 whitelist: this.config.whitelist,
@@ -86,15 +86,19 @@ export class Server {
         });
 
         await server.register({
-            // @ts-ignore
             plugin: blacklist,
             options: {
                 blacklist: this.config.blacklist,
             },
         });
 
-        // @ts-ignore
         await server.register({ plugin: jsonapi, options: this.config.jsonapi });
+
+        await server.register({ plugin: modules.generic });
+        await server.register({ plugin: modules.delegate });
+        await server.register({ plugin: modules.explorer });
+        await server.register({ plugin: modules.exchange });
+        await server.register({ plugin: modules.wallet });
 
         await mountServer(`JSON-API API (${name.toUpperCase()})`, server);
     }
