@@ -5,6 +5,7 @@ import Hapi from "@hapi/hapi";
 import { plugin as blacklist } from "@hapist/blacklist";
 import { plugin as jsonapi } from "@hapist/json-api";
 import { plugin as whitelist } from "@hapist/whitelist";
+import rateLimit from "hapi-rate-limit";
 
 export class Server {
     private logger = app.resolvePlugin<Logger.ILogger>("logger");
@@ -16,8 +17,8 @@ export class Server {
 
     public async start(): Promise<void> {
         const options = {
-            host: this.config.host,
-            port: this.config.port,
+            host: this.config.http.host,
+            port: this.config.http.port,
             routes: {
                 validate: {
                     async failAction(request, h, err) {
@@ -34,8 +35,8 @@ export class Server {
             this.registerPlugins("HTTP", this.http);
         }
 
-        if (this.config.http.enabled) {
-            this.https = await createSecureServer(options, undefined, this.config.http);
+        if (this.config.https.enabled) {
+            this.https = await createSecureServer(options, undefined, this.config.https);
             this.https.app.config = this.config;
 
             this.registerPlugins("HTTPS", this.https);
@@ -71,6 +72,11 @@ export class Server {
     }
 
     private async registerPlugins(name: string, server: Hapi.Server): Promise<void> {
+        await server.register({
+            plugin: rateLimit,
+            options: this.config.rateLimit,
+        });
+
         await server.register({
             // @ts-ignore
             plugin: whitelist,

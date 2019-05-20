@@ -7,7 +7,8 @@ export const plugin: Container.IPluginDescriptor = {
     defaults,
     alias: "json-api",
     async register(container: Container.IContainer, options) {
-        if (!options.enabled) {
+        // @ts-ignore
+        if (!options.http.enabled && !options.https.enabled) {
             container.resolvePlugin<Logger.ILogger>("logger").info("JSON-API API is disabled");
 
             return false;
