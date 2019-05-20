@@ -31,6 +31,7 @@
         "@faustbrian/hapi-version": "^0.2.11",
         "@hapi/boom": "^7.4.2",
         "@hapi/joi": "^15.0.1",
+        "@hapist/blacklist": "^0.1.0",
         "@hapist/json-api": "^0.1.0",
         "@hapist/whitelist": "^0.1.0",
         "ajv": "^6.10.0",

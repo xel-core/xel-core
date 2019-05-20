@@ -2,6 +2,8 @@ import { app } from "@arkecosystem/core-container";
 import { createSecureServer, createServer, mountServer } from "@arkecosystem/core-http-utils";
 import { Logger } from "@arkecosystem/core-interfaces";
 import Hapi from "@hapi/hapi";
+import blacklist from "@hapist/blacklist";
+import whitelist from "@hapist/whitelist";
 
 export class Server {
     private logger = app.resolvePlugin<Logger.ILogger>("logger");
@@ -68,6 +70,22 @@ export class Server {
     }
 
     private async registerPlugins(name: string, server: Hapi.Server): Promise<void> {
+        await server.register({
+            // @ts-ignore
+            plugin: whitelist,
+            options: {
+                whitelist: this.config.whitelist,
+            },
+        });
+
+        await server.register({
+            // @ts-ignore
+            plugin: blacklist,
+            options: {
+                blacklist: this.config.blacklist,
+            },
+        });
+
         for (const plugin of this.config.plugins) {
             if (typeof plugin.plugin === "string") {
                 plugin.plugin = require(plugin.plugin);
