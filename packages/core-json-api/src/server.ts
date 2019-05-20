@@ -3,6 +3,7 @@ import { createSecureServer, createServer, mountServer } from "@arkecosystem/cor
 import { Logger } from "@arkecosystem/core-interfaces";
 import Hapi from "@hapi/hapi";
 import blacklist from "@hapist/blacklist";
+import jsonapi from "@hapist/json-api";
 import whitelist from "@hapist/whitelist";
 
 export class Server {
@@ -85,6 +86,8 @@ export class Server {
                 blacklist: this.config.blacklist,
             },
         });
+
+        await server.register(jsonapi);
 
         for (const plugin of this.config.plugins) {
             if (typeof plugin.plugin === "string") {
