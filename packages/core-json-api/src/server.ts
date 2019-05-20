@@ -2,9 +2,9 @@ import { app } from "@arkecosystem/core-container";
 import { createSecureServer, createServer, mountServer } from "@arkecosystem/core-http-utils";
 import { Logger } from "@arkecosystem/core-interfaces";
 import Hapi from "@hapi/hapi";
-import blacklist from "@hapist/blacklist";
-import jsonapi from "@hapist/json-api";
-import whitelist from "@hapist/whitelist";
+import { plugin as blacklist } from "@hapist/blacklist";
+import { plugin as jsonapi } from "@hapist/json-api";
+import { plugin as whitelist } from "@hapist/whitelist";
 
 export class Server {
     private logger = app.resolvePlugin<Logger.ILogger>("logger");
@@ -12,7 +12,7 @@ export class Server {
     private http: any;
     private https: any;
 
-    public constructor(private config: any) {}
+    public constructor(private readonly config: any) {}
 
     public async start(): Promise<void> {
         const options = {
@@ -27,15 +27,15 @@ export class Server {
             },
         };
 
-        if (this.config.enabled) {
+        if (this.config.http.enabled) {
             this.http = await createServer(options);
             this.http.app.config = this.config;
 
             this.registerPlugins("HTTP", this.http);
         }
 
-        if (this.config.ssl.enabled) {
-            this.https = await createSecureServer(options, undefined, this.config.ssl);
+        if (this.config.http.enabled) {
+            this.https = await createSecureServer(options, undefined, this.config.http);
             this.https.app.config = this.config;
 
             this.registerPlugins("HTTPS", this.https);
@@ -87,15 +87,8 @@ export class Server {
             },
         });
 
-        await server.register(jsonapi);
-
-        for (const plugin of this.config.plugins) {
-            if (typeof plugin.plugin === "string") {
-                plugin.plugin = require(plugin.plugin);
-            }
-
-            await server.register(plugin);
-        }
+        // @ts-ignore
+        await server.register({ plugin: jsonapi, options: this.config.jsonapi });
 
         await mountServer(`JSON-API API (${name.toUpperCase()})`, server);
     }
