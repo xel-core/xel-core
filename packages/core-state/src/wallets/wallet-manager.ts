@@ -309,23 +309,13 @@ export class WalletManager implements State.IWalletManager {
             (wallet: State.IWallet) => !wallet.hasExtraAttribute("delegate.resigned"),
         );
 
-        const equalVotesMap: Map<Utils.BigNumber, Set<State.IWallet>> = new Map();
         let delegateWallets = delegates
             .sort((a, b) => {
                 const voteBalanceA: Utils.BigNumber = a.getExtraAttribute("delegate.voteBalance");
                 const voteBalanceB: Utils.BigNumber = b.getExtraAttribute("delegate.voteBalance");
 
                 const diff = voteBalanceB.comparedTo(voteBalanceA);
-
                 if (diff === 0) {
-                    if (!equalVotesMap.has(voteBalanceA)) {
-                        equalVotesMap.set(voteBalanceA, new Set());
-                    }
-
-                    const set = equalVotesMap.get(voteBalanceA);
-                    set.add(a);
-                    set.add(b);
-
                     if (a.publicKey === b.publicKey) {
                         throw new Error(
                             `The balance and public key of both delegates are identical! Delegate "${a.getExtraAttribute(
@@ -349,24 +339,6 @@ export class WalletManager implements State.IWalletManager {
 
         if (roundInfo) {
             delegateWallets = delegateWallets.slice(0, roundInfo.maxDelegates);
-
-            for (const [voteBalance, set] of equalVotesMap.entries()) {
-                if (voteBalance.isZero()) {
-                    continue;
-                }
-
-                const values: State.IWallet[] = Array.from(set.values());
-                if (delegateWallets.some(wallet => wallet.publicKey === values[0].publicKey)) {
-                    const mapped = values.map(v => `${v.getExtraAttribute("delegate.username")} (${v.publicKey})`);
-                    this.logger.warn(
-                        `Delegates ${JSON.stringify(
-                            mapped,
-                            undefined,
-                            4,
-                        )} have a matching vote balance of ${Utils.formatSatoshi(voteBalance)}`,
-                    );
-                }
-            }
         }
 
         return delegateWallets;
