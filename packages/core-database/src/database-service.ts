@@ -6,6 +6,7 @@ import { Handlers } from "@arkecosystem/core-transactions";
 import { roundCalculator } from "@arkecosystem/core-utils";
 import { Blocks, Crypto, Identities, Interfaces, Managers, Transactions, Utils } from "@arkecosystem/crypto";
 import assert from "assert";
+import cloneDeep from "lodash.clonedeep";
 
 export class DatabaseService implements Database.IDatabaseService {
     public connection: Database.IConnection;
@@ -107,8 +108,8 @@ export class DatabaseService implements Database.IDatabaseService {
 
                     const delegates: State.IWallet[] = this.walletManager.loadActiveDelegateList(roundInfo);
 
-                    await this.saveRound(delegates);
                     await this.setForgingDelegatesOfRound(roundInfo, delegates);
+                    await this.saveRound(delegates);
 
                     this.blocksInCurrentRound.length = 0;
 
@@ -160,33 +161,41 @@ export class DatabaseService implements Database.IDatabaseService {
     ): Promise<State.IWallet[]> {
         const { round } = roundInfo;
 
-        if (this.forgingDelegates && this.forgingDelegates.length && this.forgingDelegates[0].getExtraAttribute<number>("delegate.round") === round) {
+        if (
+            this.forgingDelegates &&
+            this.forgingDelegates.length &&
+            this.forgingDelegates[0].getExtraAttribute<number>("delegate.round") === round
+        ) {
             return this.forgingDelegates;
         }
 
         // When called during applyRound we already know the delegates, so we don't have to query the database.
         if (!delegates || delegates.length === 0) {
-            delegates = ((await this.connection.roundsRepository.findById(round)).map(({ round, publicKey, balance }) =>
+            delegates = (await this.connection.roundsRepository.findById(round)).map(({ round, publicKey, balance }) =>
                 Object.assign(new Wallets.Wallet(Identities.Address.fromPublicKey(publicKey)), {
                     publicKey,
                     extraAttributes: {
                         delegate: {
-                            round: +round,
                             voteBalance: Utils.BigNumber.make(balance),
                             username: this.walletManager
                                 .findByPublicKey(publicKey)
-                                .getExtraAttribute("delegate.username")
-                        }
+                                .getExtraAttribute("delegate.username"),
+                        },
                     },
                 }),
-            ));
+            );
+        }
+
+        for (const delegate of delegates) {
+            delegate.setExtraAttribute("delegate.round", round);
         }
 
         const seedSource: string = round.toString();
         let currentSeed: Buffer = Crypto.HashAlgorithms.sha256(seedSource);
 
+        delegates = cloneDeep(delegates);
         for (let i = 0, delCount = delegates.length; i < delCount; i++) {
-            for (let x = 0; x < 4 && i < delCount; i++ , x++) {
+            for (let x = 0; x < 4 && i < delCount; i++, x++) {
                 const newIndex = currentSeed[x] % delCount;
                 const b = delegates[newIndex];
                 delegates[newIndex] = delegates[i];
@@ -480,7 +489,7 @@ export class DatabaseService implements Database.IDatabaseService {
 
                     this.logger.debug(
                         `Delegate ${wallet.getExtraAttribute("delegate.username")} (${
-                        wallet.publicKey
+                            wallet.publicKey
                         }) just missed a block.`,
                     );
 
@@ -530,7 +539,7 @@ export class DatabaseService implements Database.IDatabaseService {
         if (blockStats.numberOfTransactions !== transactionStats.count) {
             errors.push(
                 `Number of transactions: ${transactionStats.count}, number of transactions included in blocks: ${
-                blockStats.numberOfTransactions
+                    blockStats.numberOfTransactions
                 }`,
             );
         }
@@ -539,7 +548,7 @@ export class DatabaseService implements Database.IDatabaseService {
         if (blockStats.totalFee !== transactionStats.totalFee) {
             errors.push(
                 `Total transaction fees: ${transactionStats.totalFee}, total of block.totalFee : ${
-                blockStats.totalFee
+                    blockStats.totalFee
                 }`,
             );
         }
@@ -548,7 +557,7 @@ export class DatabaseService implements Database.IDatabaseService {
         if (blockStats.totalAmount !== transactionStats.totalAmount) {
             errors.push(
                 `Total transaction amounts: ${transactionStats.totalAmount}, total of block.totalAmount : ${
-                blockStats.totalAmount
+                    blockStats.totalAmount
                 }`,
             );
         }
@@ -613,10 +622,7 @@ export class DatabaseService implements Database.IDatabaseService {
         await this.setForgingDelegatesOfRound(roundInfo, await this.calcPreviousActiveDelegates(roundInfo));
     }
 
-    private async setForgingDelegatesOfRound(
-        roundInfo: Shared.IRoundInfo,
-        delegates?: State.IWallet[],
-    ): Promise<void> {
+    private async setForgingDelegatesOfRound(roundInfo: Shared.IRoundInfo, delegates?: State.IWallet[]): Promise<void> {
         this.forgingDelegates = await this.getActiveDelegates(roundInfo, delegates);
     }
 
@@ -647,7 +653,7 @@ export class DatabaseService implements Database.IDatabaseService {
         for (const delegate of tempWalletManager.allByUsername()) {
             const delegateWallet = this.walletManager.findByUsername(delegate.getExtraAttribute("delegate.username"));
             delegateWallet.setExtraAttribute("delegate.rank", delegate.getExtraAttribute("delegate.rank"));
-        };
+        }
 
         return delegates.map(delegate => this.walletManager.findByPublicKey(delegate.publicKey));
     }
