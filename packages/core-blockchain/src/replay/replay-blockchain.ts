@@ -117,7 +117,14 @@ export class ReplayBlockchain extends Blockchain {
             sender.balance = sender.balance.minus(transaction.data.amount).minus(transaction.data.fee);
 
             if (transaction.type === Enums.TransactionTypes.DelegateRegistration) {
-                sender.setExtraAttribute("delegate.username", transaction.data.asset.delegate.username);
+                sender.setExtraAttribute("delegate", {
+                    username: transaction.data.asset.delegate.username,
+                    voteBalance: Utils.BigNumber.ZERO,
+                    forgedFees: Utils.BigNumber.ZERO,
+                    forgedRewards: Utils.BigNumber.ZERO,
+                    producedBlocks: 0,
+                    round: 0,
+                });
                 this.walletManager.reindex(sender);
             } else if (transaction.type === Enums.TransactionTypes.Vote) {
                 const vote = transaction.data.asset.votes[0];

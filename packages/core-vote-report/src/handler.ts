@@ -68,7 +68,7 @@ export const handler = (request, h) => {
     const allByUsername: State.IWallet[] = databaseService.walletManager
         .allByUsername()
         .map((delegate, index) => {
-            delegate.setExtraAttribute("delegate.rank", delegate.getExtraAttribute("rate") || index + 1);
+            delegate.setExtraAttribute("delegate.rank", delegate.getExtraAttribute("delegate.rank") || index + 1);
             return delegate;
         })
         .sort((a, b) => a.getExtraAttribute<number>("delegate.rank") - b.getExtraAttribute<number>("delegate.rank"));

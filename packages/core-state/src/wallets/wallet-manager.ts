@@ -143,13 +143,13 @@ export class WalletManager implements State.IWalletManager {
         if (delegates.length < maxDelegates) {
             throw new Error(
                 `Expected to find ${maxDelegates} delegates but only found ${delegates.length}. ` +
-                `This indicates an issue with the genesis block & delegates.`,
+                    `This indicates an issue with the genesis block & delegates.`,
             );
         }
 
         this.logger.debug(`Loaded ${delegates.length} active ${pluralize("delegate", delegates.length)}`);
 
-        return delegates as State.IWallet[];
+        return delegates;
     }
 
     // Only called during integrity verification on boot.
@@ -339,17 +339,22 @@ export class WalletManager implements State.IWalletManager {
 
                 return diff;
             })
-            .map((delegate, i): State.IWallet => {
-                const rate = i + 1;
-                delegate.setExtraAttribute("delegate.rank", rate)
-                delegate.setExtraAttribute("delegate.round", roundInfo ? roundInfo.round : 0);
-                return delegate;
-            });
+            .map(
+                (delegate, i): State.IWallet => {
+                    const rank = i + 1;
+                    delegate.setExtraAttribute("delegate.rank", rank);
+                    return delegate;
+                },
+            );
 
         if (roundInfo) {
             delegateWallets = delegateWallets.slice(0, roundInfo.maxDelegates);
 
             for (const [voteBalance, set] of equalVotesMap.entries()) {
+                if (voteBalance.isZero()) {
+                    continue;
+                }
+
                 const values: State.IWallet[] = Array.from(set.values());
                 if (delegateWallets.some(wallet => wallet.publicKey === values[0].publicKey)) {
                     const mapped = values.map(v => `${v.getExtraAttribute("delegate.username")} (${v.publicKey})`);
