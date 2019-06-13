@@ -122,15 +122,6 @@ describe("Peer socket endpoint", () => {
     });
 
     describe("Socket errors", () => {
-        it("should send back an error if no data.headers", async () => {
-            try {
-                await emit("p2p.peer.getPeers", {});
-            } catch (e) {
-                expect(e.name).toEqual("CoreHeadersRequiredError");
-                expect(e.message).toEqual("Request data and data.headers is mandatory");
-            }
-        });
-
         it("should not cancel the request when below rate limit", async () => {
             await delay(1100);
             for (let i = 0; i < 18; i++) {
@@ -159,13 +150,13 @@ describe("Peer socket endpoint", () => {
                 });
                 expect(data.state.height).toBeNumber();
             }
-            // 20th call, should throw BadConnectionError
+            // 20th call, should throw CoreRateLimitExceededError
             await expect(
                 emit("p2p.peer.postBlock", {
                     data: {},
                     headers,
                 }),
-            ).rejects.toHaveProperty("name", "BadConnectionError");
+            ).rejects.toHaveProperty("name", "CoreRateLimitExceededError");
 
             // wait a bit for socket to be disconnected
             await delay(500);

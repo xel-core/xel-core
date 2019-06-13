@@ -52,10 +52,11 @@ export class Worker extends SCWorker {
 
     private async handleEmit(req, next): Promise<void> {
         if (this.hasExceededRateLimit(req.socket.remoteAddress)) {
-            return;
+            return next(this.createError(SocketErrors.RateLimitExceeded, "Rate limit exceeded"));
         }
 
-        if (!req.data || !req.data.headers) {
+        // @TODO: check if this is still needed
+        if (!req.data) {
             return next(this.createError(SocketErrors.HeadersRequired, "Request data and data.headers is mandatory"));
         }
 
