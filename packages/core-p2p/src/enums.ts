@@ -30,5 +30,4 @@ export enum SocketErrors {
     ForgerNotAuthorized = "CoreForgerNotAuthorizedError",
     Unknown = "CoreUnknownError",
     Validation = "CoreValidationError",
-    RateLimitExceeded = "CoreRateLimitExceededError",
 }

@@ -131,7 +131,7 @@ describe("Peer socket endpoint", () => {
             }
         });
 
-        it("should not be disconnected / banned when below rate limit", async () => {
+        it("should not cancel the request when below rate limit", async () => {
             await delay(1100);
             for (let i = 0; i < 18; i++) {
                 const { data } = await emit("p2p.peer.getStatus", {
@@ -148,7 +148,7 @@ describe("Peer socket endpoint", () => {
             }
         });
 
-        it("should be disconnected and banned when exceeding rate limit", async () => {
+        it("should cancel the request when exceeding rate limit", async () => {
             const onSocketError = jest.fn();
             socket.on("error", onSocketError);
 
@@ -159,13 +159,13 @@ describe("Peer socket endpoint", () => {
                 });
                 expect(data.state.height).toBeNumber();
             }
-            // 20th call, should throw CoreRateLimitExceededError
+            // 20th call, should throw BadConnectionError
             await expect(
                 emit("p2p.peer.postBlock", {
                     data: {},
                     headers,
                 }),
-            ).rejects.toHaveProperty("name", "CoreRateLimitExceededError");
+            ).rejects.toHaveProperty("name", "BadConnectionError");
 
             // wait a bit for socket to be disconnected
             await delay(500);

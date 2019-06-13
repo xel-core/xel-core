@@ -1,11 +1,9 @@
-import dayjs, { Dayjs } from "dayjs";
 import SCWorker from "socketcluster/scworker";
 import { SocketErrors } from "../enums";
 
 export class Worker extends SCWorker {
     private peersMsgTimestamps: Record<string, number[]> = {};
     private config: Record<string, any>;
-    private readonly suspensions: Record<string, Dayjs> = {};
 
     public async run() {
         this.log(`Socket worker started, PID: ${process.pid}`);
@@ -49,21 +47,11 @@ export class Worker extends SCWorker {
             return;
         }
 
-        if (await this.isSuspended(req.socket.remoteAddress)) {
-            return next(new Error("Banned because exceeded rate limit"));
-        }
-
         next();
     }
 
     private async handleEmit(req, next): Promise<void> {
         if (this.hasExceededRateLimit(req.socket.remoteAddress)) {
-            await this.suspendPeer(req.socket.remoteAddress);
-
-            next(this.createError(SocketErrors.RateLimitExceeded, "Rate limit exceeded"));
-
-            req.socket.disconnect(4429, "Rate limit exceeded");
-
             return;
         }
 
@@ -122,20 +110,6 @@ export class Worker extends SCWorker {
         }
 
         next();
-    }
-
-    private async suspendPeer(remoteAddress: string): Promise<void> {
-        this.suspensions[remoteAddress] = dayjs().add(1, "minute");
-    }
-
-    private async isSuspended(remoteAddress: string): Promise<boolean> {
-        const suspension: Dayjs = this.suspensions[remoteAddress];
-
-        if (!suspension) {
-            return false;
-        }
-
-        return suspension.isAfter(dayjs());
     }
 
     private async log(message: string, level: string = "info"): Promise<void> {
