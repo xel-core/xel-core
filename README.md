@@ -1,8 +1,6 @@
-# ARK Core
+# XEL Core
 
-<p align="center">
-    <img src="https://raw.githubusercontent.com/ARKEcosystem/core/master/banner.png" />
-</p>
+
 
 [![Build Status](https://badgen.now.sh/circleci/github/ARKEcosystem/core)](https://circleci.com/gh/ARKEcosystem/core)
 [![Codecov](https://badgen.now.sh/codecov/c/github/arkecosystem/core)](https://codecov.io/gh/arkecosystem/core)
